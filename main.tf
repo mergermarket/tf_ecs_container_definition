@@ -25,12 +25,7 @@ data "template_file" "container_definitions" {
       )
     },"
 
-    labels = "${
-      join (
-        format(",\n      "),
-        null_resource._jsonencode_metadata_labels.*.triggers.entries
-      )
-    }"
+    labels = "${jsonencode(var.metadata)}"
   }
 
   depends_on = [
@@ -75,20 +70,3 @@ resource "null_resource" "_jsonencode_metadata_env" {
   }
   count = "${length(var.metadata)}"
 }
-
-# Create a json snippet with the list labels for the container definition
-resource "null_resource" "_jsonencode_metadata_labels" {
-  triggers {
-    entries = "${
-      jsonencode(
-        map(
-          element(keys(var.metadata), count.index),
-          element(values(var.metadata), count.index),
-          )
-      )
-    }"
-  }
-
-  count = "${length(var.metadata)}"
-}
-
