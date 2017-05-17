@@ -18,7 +18,7 @@ class TestContainerDefinition(unittest.TestCase):
         self.terraform.do_get()
         self.name = 'test-' + str(int(time.time() * 1000))
         self.vars = {
-            'container_name': self.name,
+            'name': self.name,
             'image': '123',
             'cpu': 1024,
             'memory': 1024,

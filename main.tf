@@ -4,7 +4,7 @@ data "template_file" "container_definitions" {
 
   vars {
     image          = "${var.image}"
-    container_name = "${var.container_name}"
+    container_name = "${var.name}"
     container_port = "${var.container_port}"
     cpu            = "${var.cpu}"
     mem            = "${var.memory}"

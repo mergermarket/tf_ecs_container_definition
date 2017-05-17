@@ -1,5 +1,5 @@
-variable "container_name" {
-  description = "The docker image to use"
+variable "name" {
+  description = "Name/name prefix to apply to the resources in the module"
 }
 
 variable "image" {
