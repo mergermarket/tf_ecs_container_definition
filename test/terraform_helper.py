@@ -12,6 +12,7 @@ class TerraformHelper:
         self.env = env
         self.tmpdir = tempfile.mkdtemp()
         self.tfstate_file = os.path.join(self.tmpdir, 'terraform.tfstate')
+        self.last_apply_args = None
         atexit.register(self.cleanup)
 
     def do_get(self):
@@ -41,6 +42,8 @@ class TerraformHelper:
 
         args += _flatten_list([['-var-file', f] for f in varfiles])
 
+        self.last_apply_args = args
+
         check_call_env = os.environ.copy()
         check_call_env.update(self.env)
 
@@ -53,11 +56,29 @@ class TerraformHelper:
 
         return self.last_output
 
+    def do_destroy(self):
+        if self.last_apply_args is None:
+            raise "do_destroy() called without calling do_apply() first."
+
+        check_call_env = os.environ.copy()
+        check_call_env.update(self.env)
+
+        self.last_output = subprocess.check_output(
+                ['terraform', 'destroy', '-force'] +
+                self.last_apply_args +
+                [self.terraform_root_path],
+                cwd=self.tmpdir,
+                env=check_call_env)
+
+        return self.last_output
+
     def tfstate(self):
         with open(self.tfstate_file) as tfstate_file:
             return json.load(tfstate_file)
 
     def cleanup(self):
+        if os.path.exists(self.tfstate_file):
+            self.do_destroy()
         if os.path.isdir(self.tmpdir):
             shutil.rmtree(self.tmpdir)
 
