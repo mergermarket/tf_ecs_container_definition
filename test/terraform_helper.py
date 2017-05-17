@@ -88,9 +88,22 @@ class TerraformHelper:
                 if resource in m['resources']:
                     return m['resources'][resource]
 
-    def get_output_from_module(self, module, output):
-        for m in self.tfstate()['modules']:
-            if module in m['path']:
-                if output in m['outputs']:
-                    return m['outputs'][output]['value']
-        return None
+    def get_output(self, output_name=None, module=None):
+        check_call_env = os.environ.copy()
+        check_call_env.update(self.env)
+
+        args = []
+        if module is not None:
+            args += ['-module', module]
+        if output_name is not None:
+            args += [output_name]
+        output = subprocess.check_output(
+                ['terraform', 'output', '-json'] + args,
+                cwd=self.tmpdir,
+                env=check_call_env)
+
+        parsed_output = json.loads(output)
+        if output_name is not None:
+            return parsed_output["value"]
+        else:
+            return parsed_output
