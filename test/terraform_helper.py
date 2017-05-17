@@ -27,7 +27,7 @@ class TerraformHelper:
 
         return self.last_output
 
-    def do_apply(self, vars, varfiles=[]):
+    def do_apply(self, vars, varfiles=[], varsmap=None):
         def _flatten_list(l):
             return sum(l, [])
 
@@ -41,6 +41,12 @@ class TerraformHelper:
                 )
 
         args += _flatten_list([['-var-file', f] for f in varfiles])
+
+        if varsmap is not None:
+            varsmap_file = os.path.join(self.tmpdir, 'varsmap.json')
+            with open(varsmap_file, 'w') as f:
+                f.write(json.dumps(varsmap))
+            args += ['-var-file', varsmap_file]
 
         self.last_apply_args = args
 
