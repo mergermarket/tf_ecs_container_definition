@@ -13,5 +13,3 @@ RUN apk add -U ca-certificates curl && \
     rm -rf /tmp/* /var/cache/apk/* /var/tmp/*
 
 RUN pip install --no-cache-dir -r requirements.txt
-ADD infra /infra
-

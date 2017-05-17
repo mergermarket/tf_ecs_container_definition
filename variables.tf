@@ -25,11 +25,13 @@ variable "container_port" {
 variable "container_env" {
   description = "Environment variables for this container"
   type        = "map"
+  default     = {}
 }
 
 variable "metadata" {
   description = "Metadata for this image. Will be passed as environment variables and labels"
   type        = "map"
+  default     = {}
 }
 
 
