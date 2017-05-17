@@ -30,8 +30,7 @@ data "template_file" "container_definitions" {
 
   depends_on = [
     "null_resource._jsonencode_container_env",
-    "null_resource._jsonencode_metadata_env",
-    "null_resource._jsonencode_metadata_labels",
+    "null_resource._jsonencode_metadata_env"
   ]
 }
 
