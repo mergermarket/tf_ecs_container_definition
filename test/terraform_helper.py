@@ -108,7 +108,7 @@ class TerraformHelper:
                 cwd=self.tmpdir,
                 env=check_call_env)
 
-        parsed_output = json.loads(output)
+        parsed_output = json.loads(output.decode('utf8'))
         if output_name is not None:
             return parsed_output["value"]
         else:
