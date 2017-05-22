@@ -18,32 +18,29 @@ Input variables
 Usage
 -----
 
-```
+```hcl
 module "container_defintions" {
-    source = "gihub.com/mergermarket/tf_ecs_container_definitions"
-
-	name           = "some-app"
-
-    image          = "repo/image"
-    container_port = "8080"
-    cpu            = 1024
-    memory         = 256
-
-    container_env  = {
-        VAR1 = "value1"
-        VAR2 = "value2"
-    }
-
-    metadata       = {
-		"label1" = "label.one"
-		"label2" = "label.two"
-	}
+  source = "github.com/mergermarket/tf_ecs_container_definitions"
+  
+  name           = "some-app"
+  image          = "repo/image"
+  container_port = "8080"
+  cpu            = 1024
+  memory         = 256
+  
+  container_env = {
+    VAR1 = "value1"
+    VAR2 = "value2"
+  }
+  
+  metadata = {
+    "label1" = "label.one"
+    "label2" = "label.two"
+  } 
 }
+```
 
 Outputs
 -------
 
  * `rendered`: rendered container definition
-
-
-

@@ -30,14 +30,14 @@ data "template_file" "container_definitions" {
 
   depends_on = [
     "null_resource._jsonencode_container_env",
-    "null_resource._jsonencode_metadata_env"
+    "null_resource._jsonencode_metadata_env",
   ]
 }
 
-# Create a json snippet with the list of variables to be passed to
+# Create a JSON snippet with the list of variables to be passed to
 # the container definitions.
 #
-# It will use a null_resource to generate a list of json encoded
+# It will use a null_resource to generate a list of JSON encoded
 # name-value maps like {"name": "...", "value": "..."}, and then
 # we join them in a data template file.
 resource "null_resource" "_jsonencode_container_env" {
@@ -55,7 +55,7 @@ resource "null_resource" "_jsonencode_container_env" {
   count = "${length(var.container_env)}"
 }
 
-# Json snippet with the list of labels
+# JSON snippet with the list of labels
 resource "null_resource" "_jsonencode_metadata_env" {
   triggers {
     entries = "${
@@ -67,5 +67,6 @@ resource "null_resource" "_jsonencode_metadata_env" {
       )
     }"
   }
+
   count = "${length(var.metadata)}"
 }

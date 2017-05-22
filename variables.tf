@@ -16,7 +16,6 @@ variable "memory" {
   default     = "256"
 }
 
-
 variable "container_port" {
   description = "App port to expose in the container"
   default     = "8080"
@@ -33,5 +32,3 @@ variable "metadata" {
   type        = "map"
   default     = {}
 }
-
-
