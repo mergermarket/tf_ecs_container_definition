@@ -1,9 +1,11 @@
 import unittest
 import os
 import time
+import tempfile
+import shutil
 import json
 
-from terraform_helper import TerraformHelper
+from subprocess import check_call, check_output
 
 
 REGION = 'eu-west-1'
@@ -14,42 +16,70 @@ cwd = os.getcwd()
 class TestContainerDefinition(unittest.TestCase):
 
     def setUp(self):
-        self.terraform = TerraformHelper('.')
-        self.terraform.do_get()
-        self.name = 'test-' + str(int(time.time() * 1000))
-        self.vars = {
-            'name': self.name,
+        self.workdir = tempfile.mkdtemp()
+        self.module_path = os.getcwd()
+
+        check_call([
+            'terraform', 'get', self.module_path
+            ],
+            cwd=self.workdir)
+
+    def tearDown(self):
+        check_call(
+            ['terraform', 'destroy', '-force'] +
+            self.last_args +
+            [self.module_path],
+            cwd=self.workdir)
+
+        if os.path.isdir(self.workdir):
+            shutil.rmtree(self.workdir)
+
+    def _apply_and_parse(self, vars, varsmap={}):
+        varsmap_file = os.path.join(self.workdir, 'varsmap.json')
+        with open(varsmap_file, 'w') as f:
+            f.write(json.dumps(varsmap))
+
+        args = sum([
+            ['-var', '{}={}'.format(key, val)]
+            for key, val in vars.items()
+            ], [])
+
+        args += ['-var-file', varsmap_file]
+
+        self.last_args = args
+
+        check_call([
+            'terraform', 'apply',
+            '-no-color'
+            ] + args +
+            [self.module_path],
+            cwd=self.workdir
+        )
+
+        output = check_output([
+            'terraform', 'output', '-json', 'rendered'],
+            cwd=self.workdir).decode('utf8')
+
+        parsed_output = json.loads(output)["value"]
+        parsed_definition = json.loads(parsed_output)
+        return parsed_definition
+
+    def test_is_a_valid_json(self):
+        # Given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
             'memory': 1024,
             'container_port': 8001
         }
-
-    def tearDown(self):
-        self.terraform.cleanup()
-
-    def _apply_and_parse_output(self, vars, varsmap):
-        self.terraform.do_apply(vars=vars, varsmap=varsmap)
-
-        # then
-        container_definitions_json = self.terraform.get_output(
-            output_name='rendered',
-        )
-        assert container_definitions_json != ""
-        try:
-            parsed_output = json.loads(container_definitions_json)
-        except ValueError:
-            self.fail("Container definition is not a valid json")
-
-        return parsed_output
-
-    def test_is_a_valid_json(self):
-        # when
         varsmap = {}
-        definition = self._apply_and_parse_output(self.vars, varsmap)
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
 
         # then
-        assert definition['name'] == self.name
+        assert definition['name'] == vars['name']
         assert definition['image'] == '123'
         assert definition['cpu'] == 1024
         assert definition['memory'] == 1024
@@ -58,18 +88,27 @@ class TestContainerDefinition(unittest.TestCase):
         assert {'containerPort': 8001} in definition['portMappings']
 
     def test_inserts_common_vars(self):
-        # when
+        # Given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
         varsmap = {}
-        definition = self._apply_and_parse_output(self.vars, varsmap)
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
 
         # then
         assert {
             'name': 'LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDOUT',
-            'value': '{}-stdout'.format(self.name)
+            'value': '{}-stdout'.format(vars['name'])
             } in definition['environment']
         assert {
             'name': 'LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDERR',
-            'value': '{}-stderr'.format(self.name)
+            'value': '{}-stderr'.format(vars['name'])
             } in definition['environment']
         assert {
             'name': 'STATSD_HOST',
@@ -85,9 +124,19 @@ class TestContainerDefinition(unittest.TestCase):
             } in definition['environment']
 
     def test_include_image_container_env(self):
-        # when
+        # Given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
         varsmap = {}
-        definition = self._apply_and_parse_output(self.vars, varsmap)
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
+
         # then
         assert {
             'name': 'DOCKER_IMAGE',
@@ -95,7 +144,14 @@ class TestContainerDefinition(unittest.TestCase):
             } in definition['environment']
 
     def test_metadata(self):
-        # when
+        # Given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
         varsmap = {
             'metadata': {
                 'label_key_1': 'label_value_1',
@@ -103,7 +159,8 @@ class TestContainerDefinition(unittest.TestCase):
             }
         }
 
-        definition = self._apply_and_parse_output(self.vars, varsmap)
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
 
         # then
         assert {
@@ -119,7 +176,14 @@ class TestContainerDefinition(unittest.TestCase):
             assert varsmap['metadata'][key] in definition['dockerLabels'][key]
 
     def test_container_env(self):
-        # when
+        # given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
         varsmap = {
             'container_env': {
                 'VAR1': 'value_1',
@@ -127,7 +191,8 @@ class TestContainerDefinition(unittest.TestCase):
             }
         }
 
-        definition = self._apply_and_parse_output(self.vars, varsmap)
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
 
         # then
         assert {
