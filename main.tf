@@ -26,6 +26,10 @@ data "template_file" "container_definitions" {
     },"
 
     labels = "${jsonencode(var.metadata)}"
+
+    mountpoint_sourceVolume = "${lookup(var.mountpoint, "sourceVolume", "none")}"
+    mountpoint_containerPath = "${lookup(var.mountpoint, "containerPath", "none")}"
+    mountpoint_readOnly = "${lookup(var.mountpoint, "readOnly", false)}"
   }
 
   depends_on = [

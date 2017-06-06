@@ -17,5 +17,15 @@
       { "name": "STATSD_PORT", "value": "8125" },
       { "name": "STATSD_ENABLED", "value": "true" }
     ],
-    "dockerLabels": ${labels}
+    "dockerLabels": ${labels},
+    "mountPoints": [
+      ${mountpoint_sourceVolume == "none" ? "" :
+          format(
+            "{ \"sourceVolume\": \"%s\", \"containerPath\": \"%s\", \"readOnly\": %s }",
+            mountpoint_sourceVolume,
+            mountpoint_containerPath,
+            mountpoint_readOnly
+          )
+      }
+    ]
   }
