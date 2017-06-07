@@ -40,9 +40,9 @@ module "container_defintions" {
   }
 
   mountpoint = {
-	sourceVolume = 'data_volume',
+    sourceVolume  = 'data_volume',
     containerPath = '/mnt/data',
-    readOnly = true
+    readOnly      = true
   }
 }
 ```
