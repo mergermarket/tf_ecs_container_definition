@@ -14,6 +14,7 @@ Input variables
  * `memory`- (string) OPTIONAL - The memory limit for this container definition
  * `env`: (map) OPTIONAL - map with environment variables
  * `metadata`: (map) OPTIONAL - Set of metadata for this container. It will be passed as environment variables (key uppercased) and labels.
+ * `mountpoint`: (map) OPTIONAL - Configuration of one mountpoint for this volume. Map with the values `sourceVolume`, `containerPath` and (optional) `readOnly` .
 
 Usage
 -----
@@ -21,22 +22,28 @@ Usage
 ```hcl
 module "container_defintions" {
   source = "github.com/mergermarket/tf_ecs_container_definitions"
-  
+
   name           = "some-app"
   image          = "repo/image"
   container_port = "8080"
   cpu            = 1024
   memory         = 256
-  
+
   container_env = {
     VAR1 = "value1"
     VAR2 = "value2"
   }
-  
+
   metadata = {
     "label1" = "label.one"
     "label2" = "label.two"
-  } 
+  }
+
+  mountpoint = {
+    sourceVolume  = 'data_volume',
+    containerPath = '/mnt/data',
+    readOnly      = true
+  }
 }
 ```
 

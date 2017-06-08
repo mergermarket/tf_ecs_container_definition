@@ -60,6 +60,7 @@ class TestContainerDefinition(unittest.TestCase):
             'terraform', 'output', '-json', 'rendered'],
             cwd=self.workdir).decode('utf8')
 
+        print(output)
         parsed_output = json.loads(output)["value"]
         parsed_definition = json.loads(parsed_output)
         return parsed_definition
@@ -203,3 +204,74 @@ class TestContainerDefinition(unittest.TestCase):
             'name': 'VAR2',
             'value': 'value_2'
             } in definition['environment']
+
+    def test_mountpoint_not_set(self):
+        # given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
+        varsmap = {}
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
+
+        # then
+        assert [] == definition['mountPoints']
+
+    def test_mountpoint_no_readonly(self):
+        # given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
+        varsmap = {
+            'mountpoint': {
+                'sourceVolume': 'data_volume',
+                'containerPath': '/mnt/data'
+            }
+        }
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
+
+        # then
+        assert [{
+            'containerPath': '/mnt/data',
+            'sourceVolume': 'data_volume',
+            'readOnly': False
+            }] == definition['mountPoints']
+
+    def test_mountpoint_readonly(self):
+        # given
+        vars = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
+        varsmap = {
+            'mountpoint': {
+                'sourceVolume': 'data_volume',
+                'containerPath': '/mnt/data',
+                'readOnly': 'true'
+            }
+        }
+
+        # when
+        definition = self._apply_and_parse(vars, varsmap)
+
+        # then
+        assert [{
+            'containerPath': '/mnt/data',
+            'sourceVolume': 'data_volume',
+            'readOnly': True
+            }] == definition['mountPoints']
+

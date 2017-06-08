@@ -32,3 +32,9 @@ variable "metadata" {
   type        = "map"
   default     = {}
 }
+
+variable "mountpoint" {
+  description = "Mountpoint map with 'sourceVolume' and 'containerPath' and 'readOnly' (optional)."
+  type        = "map"
+  default     = {}
+}
