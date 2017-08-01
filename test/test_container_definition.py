@@ -88,42 +88,6 @@ class TestContainerDefinition(unittest.TestCase):
 
         assert {'containerPort': 8001} in definition['portMappings']
 
-    def test_inserts_common_vars(self):
-        # Given
-        vars = {
-            'name': 'test-' + str(int(time.time() * 1000)),
-            'image': '123',
-            'cpu': 1024,
-            'memory': 1024,
-            'container_port': 8001
-        }
-        varsmap = {}
-
-        # when
-        definition = self._apply_and_parse(vars, varsmap)
-
-        # then
-        assert {
-            'name': 'LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDOUT',
-            'value': '{}-stdout'.format(vars['name'])
-            } in definition['environment']
-        assert {
-            'name': 'LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDERR',
-            'value': '{}-stderr'.format(vars['name'])
-            } in definition['environment']
-        assert {
-            'name': 'STATSD_HOST',
-            'value': '172.17.42.1',
-            } in definition['environment']
-        assert {
-            'name': 'STATSD_PORT',
-            'value': '8125',
-            } in definition['environment']
-        assert {
-            'name': 'STATSD_ENABLED',
-            'value': 'true',
-            } in definition['environment']
-
     def test_include_image_container_env(self):
         # Given
         vars = {
