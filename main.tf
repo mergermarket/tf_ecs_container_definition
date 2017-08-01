@@ -14,16 +14,10 @@ data "template_file" "container_definitions" {
         format(",\n      "),
         concat(
           null_resource._jsonencode_container_env.*.triggers.entries,
-          null_resource._jsonencode_metadata_env.*.triggers.entries,
-          list(jsonencode(
-            map(
-              "name", "CONTAINER_NAME",
-              "value", var.name,
-            )
-          ))
+          null_resource._jsonencode_metadata_env.*.triggers.entries
         )
       )
-    },"
+    }"
 
     labels = "${jsonencode(var.metadata)}"
 
