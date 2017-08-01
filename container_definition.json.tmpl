@@ -11,11 +11,7 @@
     "memory": ${mem},
     "environment": [
       ${container_env}
-      { "name": "LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDOUT", "value": "${container_name}-stdout" },
-      { "name": "LOGSPOUT_CLOUDWATCHLOGS_LOG_GROUP_STDERR", "value": "${container_name}-stderr" },
-      { "name": "STATSD_HOST", "value": "172.17.42.1" },
-      { "name": "STATSD_PORT", "value": "8125" },
-      { "name": "STATSD_ENABLED", "value": "true" }
+      {"name":"DOCKER_IMAGE", "value":"${image}"}
     ],
     "dockerLabels": ${labels},
     "mountPoints": [

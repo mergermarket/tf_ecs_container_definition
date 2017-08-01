@@ -17,8 +17,8 @@ data "template_file" "container_definitions" {
           null_resource._jsonencode_metadata_env.*.triggers.entries,
           list(jsonencode(
             map(
-              "name", "DOCKER_IMAGE",
-              "value", var.image,
+              "name", "CONTAINER_NAME",
+              "value", var.name,
             )
           ))
         )
