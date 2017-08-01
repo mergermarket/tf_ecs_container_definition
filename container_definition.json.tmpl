@@ -11,7 +11,7 @@
     "memory": ${mem},
     "environment": [
       ${container_env}
-      {"IMAGE": "${image}"}
+      {"name":"IMAGE", "value":"${image}"}
     ],
     "dockerLabels": ${labels},
     "mountPoints": [
