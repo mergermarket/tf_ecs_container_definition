@@ -34,14 +34,14 @@ class TestContainerDefinition(unittest.TestCase):
         if os.path.isdir(self.workdir):
             shutil.rmtree(self.workdir)
 
-    def _apply_and_parse(self, vars, varsmap={}):
+    def _apply_and_parse(self, variables, varsmap={}):
         varsmap_file = os.path.join(self.workdir, 'varsmap.json')
         with open(varsmap_file, 'w') as f:
             f.write(json.dumps(varsmap))
 
         args = sum([
             ['-var', '{}={}'.format(key, val)]
-            for key, val in vars.items()
+            for key, val in variables.items()
             ], [])
 
         args += ['-var-file', varsmap_file]
@@ -67,7 +67,7 @@ class TestContainerDefinition(unittest.TestCase):
 
     def test_is_a_valid_json(self):
         # Given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -77,10 +77,10 @@ class TestContainerDefinition(unittest.TestCase):
         varsmap = {}
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
-        assert definition['name'] == vars['name']
+        assert definition['name'] == variables['name']
         assert definition['image'] == '123'
         assert definition['cpu'] == 1024
         assert definition['memory'] == 1024
@@ -88,9 +88,9 @@ class TestContainerDefinition(unittest.TestCase):
 
         assert {'containerPort': 8001} in definition['portMappings']
 
-    def test_include_image_container_env(self):
+    def test_include_defaults_in_container_env(self):
         # Given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -100,7 +100,7 @@ class TestContainerDefinition(unittest.TestCase):
         varsmap = {}
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert {
@@ -108,9 +108,14 @@ class TestContainerDefinition(unittest.TestCase):
             'value': '123'
             } in definition['environment']
 
+        assert {
+            'name': 'CONTAINER_NAME',
+            'value': variables['name']
+            } in definition['environment']
+
     def test_metadata(self):
         # Given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -125,7 +130,7 @@ class TestContainerDefinition(unittest.TestCase):
         }
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert {
@@ -142,7 +147,7 @@ class TestContainerDefinition(unittest.TestCase):
 
     def test_container_env(self):
         # given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -157,7 +162,7 @@ class TestContainerDefinition(unittest.TestCase):
         }
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert {
@@ -171,7 +176,7 @@ class TestContainerDefinition(unittest.TestCase):
 
     def test_mountpoint_not_set(self):
         # given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -181,14 +186,14 @@ class TestContainerDefinition(unittest.TestCase):
         varsmap = {}
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert [] == definition['mountPoints']
 
     def test_mountpoint_no_readonly(self):
         # given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -203,7 +208,7 @@ class TestContainerDefinition(unittest.TestCase):
         }
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert [{
@@ -214,7 +219,7 @@ class TestContainerDefinition(unittest.TestCase):
 
     def test_mountpoint_readonly(self):
         # given
-        vars = {
+        variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
             'image': '123',
             'cpu': 1024,
@@ -230,7 +235,7 @@ class TestContainerDefinition(unittest.TestCase):
         }
 
         # when
-        definition = self._apply_and_parse(vars, varsmap)
+        definition = self._apply_and_parse(variables, varsmap)
 
         # then
         assert [{
