@@ -88,7 +88,7 @@ class TestContainerDefinition(unittest.TestCase):
 
         assert {'containerPort': 8001} in definition['portMappings']
 
-    def test_metadata(self):
+    def test_labels(self):
         # Given
         variables = {
             'name': 'test-' + str(int(time.time() * 1000)),
@@ -98,7 +98,7 @@ class TestContainerDefinition(unittest.TestCase):
             'container_port': 8001
         }
         varsmap = {
-            'metadata': {
+            'labels': {
                 'label_key_1': 'label_value_1',
                 'label_key_2': 'label_value_2',
             }
@@ -111,14 +111,14 @@ class TestContainerDefinition(unittest.TestCase):
         assert {
             'name': 'LABEL_KEY_1',
             'value': 'label_value_1'
-            } in definition['environment']
+            } not in definition['environment']
         assert {
             'name': 'LABEL_KEY_2',
             'value': 'label_value_2'
-            } in definition['environment']
+            } not in definition['environment']
 
-        for key in varsmap['metadata']:
-            assert varsmap['metadata'][key] in definition['dockerLabels'][key]
+        for key in varsmap['labels']:
+            assert varsmap['labels'][key] in definition['dockerLabels'][key]
 
     def test_container_env(self):
         # given

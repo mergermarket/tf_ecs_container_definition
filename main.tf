@@ -12,14 +12,11 @@ data "template_file" "container_definitions" {
     container_env = "${
       join (
         format(",\n      "),
-        concat(
-          null_resource._jsonencode_container_env.*.triggers.entries,
-          null_resource._jsonencode_metadata_env.*.triggers.entries
-        )
+        null_resource._jsonencode_container_env.*.triggers.entries
       )
     }"
 
-    labels = "${jsonencode(var.metadata)}"
+    labels = "${jsonencode(var.labels)}"
 
     mountpoint_sourceVolume  = "${lookup(var.mountpoint, "sourceVolume", "none")}"
     mountpoint_containerPath = "${lookup(var.mountpoint, "containerPath", "none")}"
@@ -27,8 +24,7 @@ data "template_file" "container_definitions" {
   }
 
   depends_on = [
-    "null_resource._jsonencode_container_env",
-    "null_resource._jsonencode_metadata_env",
+    "null_resource._jsonencode_container_env"
   ]
 }
 
@@ -53,18 +49,3 @@ resource "null_resource" "_jsonencode_container_env" {
   count = "${length(var.container_env)}"
 }
 
-# JSON snippet with the list of labels
-resource "null_resource" "_jsonencode_metadata_env" {
-  triggers {
-    entries = "${
-      jsonencode(
-        map(
-          "name", upper(element(keys(var.metadata), count.index)),
-          "value", element(values(var.metadata), count.index),
-          )
-      )
-    }"
-  }
-
-  count = "${length(var.metadata)}"
-}
