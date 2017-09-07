@@ -27,8 +27,14 @@ variable "container_env" {
   default     = {}
 }
 
+variable "labels" {
+  description = "Labels to be applied to the docker container"
+  type        = "map"
+  default     = {}
+}
+
 variable "metadata" {
-  description = "Metadata for this image. Will be passed as environment variables and labels"
+  description = "DEPRECATED - values passed to this variable will be ignored"
   type        = "map"
   default     = {}
 }
