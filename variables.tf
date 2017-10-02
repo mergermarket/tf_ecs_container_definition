@@ -8,7 +8,7 @@ variable "image" {
 
 variable "cpu" {
   description = "The CPU limit for this container definition"
-  default     = "256"
+  default     = "64"
 }
 
 variable "memory" {
