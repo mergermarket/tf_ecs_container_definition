@@ -8,44 +8,38 @@ data "template_file" "container_definitions" {
     container_port = "${var.container_port}"
     cpu            = "${var.cpu}"
     mem            = "${var.memory}"
-
-    container_env = "${
-      join (
-        format(",\n      "),
-        null_resource._jsonencode_container_env.*.triggers.entries
-      )
-    }"
-
-    labels = "${jsonencode(var.labels)}"
+    container_env  = "${data.external.encode_env.result["env"]}"
+    labels         = "${jsonencode(var.labels)}"
 
     mountpoint_sourceVolume  = "${lookup(var.mountpoint, "sourceVolume", "none")}"
     mountpoint_containerPath = "${lookup(var.mountpoint, "containerPath", "none")}"
     mountpoint_readOnly      = "${lookup(var.mountpoint, "readOnly", false)}"
   }
+}
 
-  depends_on = [
-    "null_resource._jsonencode_container_env"
+data "external" "encode_env" {
+  program = [
+    "python", "-c", <<END
+import json
+from sys import stdin
+terraform_input = json.loads(stdin.read())
+env = json.loads(terraform_input["env"])
+metadata = {
+  key.upper(): value
+  for key, value
+  in json.loads(terraform_input["metadata"]).items()
+}
+output = [
+  {"name": key, "value": value}
+  for key, value
+  in list(env.items()) + list(metadata.items())
+]
+print(json.dumps({"env": json.dumps(output)}))
+END
   ]
-}
 
-# Create a JSON snippet with the list of variables to be passed to
-# the container definitions.
-#
-# It will use a null_resource to generate a list of JSON encoded
-# name-value maps like {"name": "...", "value": "..."}, and then
-# we join them in a data template file.
-resource "null_resource" "_jsonencode_container_env" {
-  triggers {
-    entries = "${
-      jsonencode(
-        map(
-          "name", element(keys(var.container_env), count.index),
-          "value", element(values(var.container_env), count.index),
-          )
-      )
-    }"
+  query = {
+    env      = "${jsonencode(var.container_env)}",
+    metadata = "${jsonencode(var.metadata)}"
   }
-
-  count = "${length(var.container_env)}"
 }
-

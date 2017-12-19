@@ -9,9 +9,7 @@
     ],
     "cpu": ${cpu},
     "memory": ${mem},
-    "environment": [
-      ${container_env}
-    ],
+    "environment": ${container_env},
     "dockerLabels": ${labels},
     "mountPoints": [
       ${mountpoint_sourceVolume == "none" ? "" :
