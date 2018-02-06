@@ -20,5 +20,12 @@
             mountpoint_readOnly
           )
       }
+    ],
+    "ulimits": [
+      {
+        "name": "nofile",
+        "softLimit": ${nofile_soft_ulimit},
+        "hardLimit": 65535
+      }
     ]
   }

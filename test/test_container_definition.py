@@ -72,7 +72,8 @@ class TestContainerDefinition(unittest.TestCase):
             'image': '123',
             'cpu': 1024,
             'memory': 1024,
-            'container_port': 8001
+            'container_port': 8001,
+            'nofile_soft_ulimit': 1000
         }
         varsmap = {}
 
@@ -86,6 +87,7 @@ class TestContainerDefinition(unittest.TestCase):
         assert definition['memory'] == 1024
         assert definition['essential']
 
+        assert {'softLimit': 1000, 'name': 'nofile', 'hardLimit': 65535} in definition['ulimits']
         assert {'containerPort': 8001} in definition['portMappings']
 
     def test_labels(self):
