@@ -3,14 +3,14 @@ data "template_file" "container_definitions" {
   template = "${file("${path.module}/container_definition.json.tmpl")}"
 
   vars {
-    image          = "${var.image}"
-    container_name = "${var.name}"
-    container_port = "${var.container_port}"
-    cpu            = "${var.cpu}"
-    mem            = "${var.memory}"
-    container_env  = "${data.external.encode_env.result["env"]}"
-    labels         = "${jsonencode(var.labels)}"
-    soft_ulimit    = "${var.soft_ulimit}"
+    image              = "${var.image}"
+    container_name     = "${var.name}"
+    container_port     = "${var.container_port}"
+    cpu                = "${var.cpu}"
+    mem                = "${var.memory}"
+    container_env      = "${data.external.encode_env.result["env"]}"
+    labels             = "${jsonencode(var.labels)}"
+    nofile_soft_ulimit = "${var.nofile_soft_ulimit}"
 
     mountpoint_sourceVolume  = "${lookup(var.mountpoint, "sourceVolume", "none")}"
     mountpoint_containerPath = "${lookup(var.mountpoint, "containerPath", "none")}"

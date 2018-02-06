@@ -16,7 +16,7 @@ variable "memory" {
   default     = "256"
 }
 
-variable "soft_ulimit" {
+variable "nofile_soft_ulimit" {
   description = "The soft ulimit for the number of files in container"
   default     = "4096"
 }

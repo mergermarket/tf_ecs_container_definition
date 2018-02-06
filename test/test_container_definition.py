@@ -73,7 +73,7 @@ class TestContainerDefinition(unittest.TestCase):
             'cpu': 1024,
             'memory': 1024,
             'container_port': 8001,
-            'soft_ulimit': 1000
+            'nofile_soft_ulimit': 1000
         }
         varsmap = {}
 
