@@ -10,6 +10,7 @@ data "template_file" "container_definitions" {
     mem            = "${var.memory}"
     container_env  = "${data.external.encode_env.result["env"]}"
     labels         = "${jsonencode(var.labels)}"
+    soft_ulimit    = "${var.soft_ulimit}"
 
     mountpoint_sourceVolume  = "${lookup(var.mountpoint, "sourceVolume", "none")}"
     mountpoint_containerPath = "${lookup(var.mountpoint, "containerPath", "none")}"
