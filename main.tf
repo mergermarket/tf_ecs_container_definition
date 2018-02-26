@@ -5,7 +5,11 @@ data "template_file" "container_definitions" {
   vars {
     image              = "${var.image}"
     container_name     = "${var.name}"
-    container_port     = "${var.container_port}"
+    port_mappings      = "${
+      var.port_mappings == "" ?
+        format("[ { \"containerPort\": %s } ]", var.container_port) :
+        var.port_mappings
+    }"
     cpu                = "${var.cpu}"
     mem                = "${var.memory}"
     container_env      = "${data.external.encode_env.result["env"]}"
