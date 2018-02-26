@@ -2,11 +2,7 @@
     "name": "${container_name}",
     "essential": true,
     "image": "${image}",
-    "portMappings": [
-      {
-        "containerPort": ${container_port}
-      }
-    ],
+    "portMappings": ${port_mappings},
     "cpu": ${cpu},
     "memory": ${mem},
     "environment": ${container_env},

@@ -90,6 +90,25 @@ class TestContainerDefinition(unittest.TestCase):
         assert {'softLimit': 1000, 'name': 'nofile', 'hardLimit': 65535} in definition['ulimits']
         assert {'containerPort': 8001} in definition['portMappings']
 
+    def test_override_port_mappings(self):
+        # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'nofile_soft_ulimit': 1000
+        }
+        varsmap = {
+            'port_mappings': '[{"containerPort":7654}]'
+        }
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert [ { 'containerPort': 7654 } ] == definition['portMappings']
+        
     def test_labels(self):
         # Given
         variables = {
