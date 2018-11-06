@@ -256,5 +256,5 @@ class TestContainerDefinition(unittest.TestCase):
         definition = self._apply_and_parse(variables, varsmap)
 
         # then
-        assert definition['initProcessEnabled']
+        assert definition['linuxParameters']['initProcessEnabled']
 
