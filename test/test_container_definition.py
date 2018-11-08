@@ -240,3 +240,21 @@ class TestContainerDefinition(unittest.TestCase):
             'readOnly': True
             }] == definition['mountPoints']
 
+
+    def test_init_process_enabled(self):
+        # given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'container_port': 8001
+        }
+        varsmap = {}
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['linuxParameters']['initProcessEnabled']
+
