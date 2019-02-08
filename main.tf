@@ -13,6 +13,7 @@ data "template_file" "container_definitions" {
     cpu                = "${var.cpu}"
     mem                = "${var.memory}"
     container_env      = "${data.external.encode_env.result["env"]}"
+    secrets            = "${data.external.encode_secrets.result["secrets"]}"
     labels             = "${jsonencode(var.labels)}"
     nofile_soft_ulimit = "${var.nofile_soft_ulimit}"
 
@@ -23,28 +24,16 @@ data "template_file" "container_definitions" {
 }
 
 data "external" "encode_env" {
-  program = [
-    "python", "-c", <<END
-import json
-from sys import stdin
-terraform_input = json.loads(stdin.read())
-env = json.loads(terraform_input["env"])
-metadata = {
-  key.upper(): value
-  for key, value
-  in json.loads(terraform_input["metadata"]).items()
-}
-output = [
-  {"name": key, "value": value}
-  for key, value
-  in list(env.items()) + list(metadata.items())
-]
-print(json.dumps({"env": json.dumps(output)}))
-END
-  ]
-
+  program = [ "python", "-c", "${path.module}/encode_env.py"] 
   query = {
     env      = "${jsonencode(var.container_env)}",
     metadata = "${jsonencode(var.metadata)}"
+  }
+}
+
+data "external" "encode_secrets" {
+  program = ["python", "${path.module}/encode_secrets.py"]
+  query = {
+    secrets = "${jsonencode(local.secrets)}"
   }
 }
