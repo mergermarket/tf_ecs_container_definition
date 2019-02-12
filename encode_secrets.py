@@ -2,7 +2,6 @@ import json
 from sys import stdin
 
 terraform_input = json.loads(stdin.read())
-
 secrets = json.loads(terraform_input["secrets"])
 
 output = [
