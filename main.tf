@@ -3,6 +3,7 @@ locals {
     env = "${lookup(var.labels, "env", "")}"
     component = "${lookup(var.labels, "component", "")}"
 }
+
 data "template_file" "container_definitions" {
   template = "${file("${path.module}/container_definition.json.tmpl")}"
 

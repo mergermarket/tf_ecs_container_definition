@@ -5,7 +5,7 @@ import tempfile
 import shutil
 import json
 
-from subprocess import check_call, check_output
+from subprocess import check_call, check_output, PIPE, Popen
 
 
 REGION = 'eu-west-1'
@@ -256,3 +256,19 @@ class TestContainerDefinition(unittest.TestCase):
 
         # then
         assert definition['linuxParameters']['initProcessEnabled']
+
+class TestEncodeSecrets(unittest.TestCase):
+
+    def test_encode_secrets(self):
+        secrets_value = json.dumps({'Val1':'some-secret-arn'})
+        secrets = {'secrets': secrets_value }
+        j = json.dumps(secrets)
+        output = check_output(
+            ['python', 'encode_secrets.py'],
+            input=(str.encode(j))
+        )
+        expected = [{'name':'Val1', 'valueFrom':'some-secret-arn'}]
+        actual = json.loads(output.decode())
+        secrets = json.loads(actual['secrets'])
+        assert secrets == expected
+
