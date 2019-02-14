@@ -43,9 +43,6 @@ data "external" "encode_secrets" {
   program = ["python", "${path.module}/encode_secrets.py"]
 
   query = {
-    team      = "${local.team}"
-    env       = "${local.env}"
-    component = "${local.component}"
     secrets   = "${jsonencode(zipmap(var.secret_names, data.aws_secretsmanager_secret.secret.*.arn))}"
   }
 }
