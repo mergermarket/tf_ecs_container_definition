@@ -26,6 +26,7 @@ module "tf_ecs_container_definition_test" {
   container_env      = "${var.container_env}"
   metadata           = "${var.metadata}"
   secret_names       = "${var.secret_names}"
+  common_secrets     = "${var.common_secrets}"
 }
 
 variable "name" {}
@@ -49,6 +50,8 @@ variable "container_env" { default = {} }
 variable "metadata" { default = {} }
  
 variable "secret_names" { default = [] }
+
+variable "common_secrets" { default = [] }
 
 variable "memory" {}
 

@@ -56,15 +56,12 @@ variable "port_mappings" {
   type        = "string"
 }
 
-# variable "env" {
-#   type = "string"
-# }
-# 
-# variable "team" {
-#   type = "string"
-# }
-
 variable "secret_names" {
+  type = "list"
+  default = []
+}
+
+variable "common_secrets" {
   type = "list"
   default = []
 }
