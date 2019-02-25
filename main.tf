@@ -43,14 +43,14 @@ data "external" "encode_secrets" {
   program = ["python", "${path.module}/encode_secrets.py"]
 
   query = {
-    secrets   = "${jsonencode(zipmap(var.secret_names, data.aws_secretsmanager_secret.secret.*.arn))}"
+    secrets   = "${jsonencode(zipmap(var.team_secrets, data.aws_secretsmanager_secret.secret.*.arn))}"
     common_secrets ="${jsonencode(zipmap(var.common_secrets, data.aws_secretsmanager_secret.common_secrets.*.arn))}"
   }
 }
 
 data "aws_secretsmanager_secret" "secret" {
-  count = "${length(var.secret_names)}"
-  name  = "${local.team}/${local.env}/${local.component}/${element(var.secret_names, count.index)}"
+  count = "${length(var.team_secrets)}"
+  name  = "${local.team}/${local.env}/${local.component}/${element(var.team_secrets, count.index)}"
 }
 
 data "aws_secretsmanager_secret" "common_secrets" {

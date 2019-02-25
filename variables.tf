@@ -56,7 +56,7 @@ variable "port_mappings" {
   type        = "string"
 }
 
-variable "secret_names" {
+variable "team_secrets" {
   type = "list"
   default = []
 }
