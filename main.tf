@@ -1,18 +1,26 @@
-# container definition template mapping
+locals {
+    team = "${lookup(var.labels, "team", "")}"
+    env = "${lookup(var.labels, "env", "")}"
+    component = "${lookup(var.labels, "component", "")}"
+}
+
 data "template_file" "container_definitions" {
   template = "${file("${path.module}/container_definition.json.tmpl")}"
 
   vars {
-    image              = "${var.image}"
-    container_name     = "${var.name}"
-    port_mappings      = "${
+    image          = "${var.image}"
+    container_name = "${var.name}"
+
+    port_mappings = "${
       var.port_mappings == "" ?
         format("[ { \"containerPort\": %s } ]", var.container_port) :
         var.port_mappings
     }"
+
     cpu                = "${var.cpu}"
     mem                = "${var.memory}"
     container_env      = "${data.external.encode_env.result["env"]}"
+    secrets            = "${data.external.encode_secrets.result["secrets"]}"
     labels             = "${jsonencode(var.labels)}"
     nofile_soft_ulimit = "${var.nofile_soft_ulimit}"
 
@@ -23,28 +31,29 @@ data "template_file" "container_definitions" {
 }
 
 data "external" "encode_env" {
-  program = [
-    "python", "-c", <<END
-import json
-from sys import stdin
-terraform_input = json.loads(stdin.read())
-env = json.loads(terraform_input["env"])
-metadata = {
-  key.upper(): value
-  for key, value
-  in json.loads(terraform_input["metadata"]).items()
-}
-output = [
-  {"name": key, "value": value}
-  for key, value
-  in list(env.items()) + list(metadata.items())
-]
-print(json.dumps({"env": json.dumps(output)}))
-END
-  ]
+  program = ["python", "${path.module}/encode_env.py"]
 
   query = {
     env      = "${jsonencode(var.container_env)}",
     metadata = "${jsonencode(var.metadata)}"
   }
+}
+
+data "external" "encode_secrets" {
+  program = ["python", "${path.module}/encode_secrets.py"]
+
+  query = {
+    secrets   = "${jsonencode(zipmap(var.team_secrets, data.aws_secretsmanager_secret.secret.*.arn))}"
+    common_secrets ="${jsonencode(zipmap(var.common_secrets, data.aws_secretsmanager_secret.common_secrets.*.arn))}"
+  }
+}
+
+data "aws_secretsmanager_secret" "secret" {
+  count = "${length(var.team_secrets)}"
+  name  = "${local.team}/${local.env}/${local.component}/${element(var.team_secrets, count.index)}"
+}
+
+data "aws_secretsmanager_secret" "common_secrets" {
+  count = "${length(var.common_secrets)}"
+  name  = "common/${element(var.common_secrets, count.index)}"
 }
