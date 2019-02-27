@@ -55,3 +55,13 @@ variable "port_mappings" {
   default     = ""
   type        = "string"
 }
+
+variable "team_secrets" {
+  type = "list"
+  default = []
+}
+
+variable "common_secrets" {
+  type = "list"
+  default = []
+}
