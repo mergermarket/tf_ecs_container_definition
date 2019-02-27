@@ -5,7 +5,7 @@ import tempfile
 import shutil
 import json
 
-from subprocess import check_call, check_output
+from subprocess import check_call, check_output, PIPE, Popen
 
 
 REGION = 'eu-west-1'
@@ -17,19 +17,17 @@ class TestContainerDefinition(unittest.TestCase):
 
     def setUp(self):
         self.workdir = tempfile.mkdtemp()
-        self.module_path = os.getcwd()
+        self.module_path = f'{os.getcwd()}/test/infra'
 
-        check_call([
-            'terraform', 'get', self.module_path
-            ],
-            cwd=self.workdir)
+        check_call(['terraform', 'init', self.module_path], cwd=self.workdir)
+        check_call(['terraform', 'get', self.module_path], cwd=self.workdir)
 
     def tearDown(self):
+        print('Tearing down')
         check_call(
-            ['terraform', 'destroy', '-force'] +
-            self.last_args +
-            [self.module_path],
-            cwd=self.workdir)
+            ['terraform', 'destroy', '-force'] + self.last_args + [self.module_path],
+            cwd=self.workdir
+        )
 
         if os.path.isdir(self.workdir):
             shutil.rmtree(self.workdir)
@@ -39,28 +37,29 @@ class TestContainerDefinition(unittest.TestCase):
         with open(varsmap_file, 'w') as f:
             f.write(json.dumps(varsmap))
 
-        args = sum([
-            ['-var', '{}={}'.format(key, val)]
-            for key, val in variables.items()
-            ], [])
+        args = sum(
+            [
+                ['-var', '{}={}'.format(key, val)]
+                for key, val in variables.items()
+            ], []
+        )
+        print('args',args)
 
         args += ['-var-file', varsmap_file]
 
         self.last_args = args
 
-        check_call([
-            'terraform', 'apply',
-            '-no-color'
-            ] + args +
-            [self.module_path],
+        check_call(
+            ['terraform', 'apply', '-no-color'] + args + [self.module_path],
             cwd=self.workdir
         )
 
-        output = check_output([
-            'terraform', 'output', '-json', 'rendered'],
-            cwd=self.workdir).decode('utf8')
+        output = check_output(
+            ['terraform', 'output', '-json', 'rendered'],
+            cwd=self.workdir
+        ).decode('utf8')
 
-        print(output)
+        print('output', output)
         parsed_output = json.loads(output)["value"]
         parsed_definition = json.loads(parsed_output)
         return parsed_definition
@@ -73,7 +72,8 @@ class TestContainerDefinition(unittest.TestCase):
             'cpu': 1024,
             'memory': 1024,
             'container_port': 8001,
-            'nofile_soft_ulimit': 1000
+            'nofile_soft_ulimit': 1000,
+            'labels': {}
         }
         varsmap = {}
 
@@ -256,3 +256,67 @@ class TestContainerDefinition(unittest.TestCase):
 
         # then
         assert definition['linuxParameters']['initProcessEnabled']
+
+class TestEncodeSecrets(unittest.TestCase):
+
+    def test_encode_secrets(self):
+        secrets_value = json.dumps({'Val1':'some-secret-arn'})
+        secrets = {'secrets': secrets_value }
+        j = json.dumps(secrets)
+        output = check_output(
+            ['python', 'encode_secrets.py'],
+            input=(str.encode(j))
+        )
+        expected = [{'name':'Val1', 'valueFrom':'some-secret-arn'}]
+        actual = json.loads(output.decode())
+        secrets = json.loads(actual['secrets'])
+        assert secrets == expected
+
+    def test_encode_common_secrets(self):
+        secrets_value = json.dumps({'Val1':'some-secret-arn'})
+        secrets = {'common_secrets': secrets_value }
+        j = json.dumps(secrets)
+        output = check_output(
+            ['python', 'encode_secrets.py'],
+            input=(str.encode(j))
+        )
+        expected = [{'name':'Val1', 'valueFrom':'some-secret-arn'}]
+        actual = json.loads(output.decode())
+        secrets = json.loads(actual['secrets'])
+        assert secrets == expected
+
+    def test_encode_all_secrets(self):
+        secrets_value = json.dumps({'Val1':'some-secret-arn'})
+        common_secrets_value = json.dumps({'Val2':'some-secret-arn'})
+        secrets = {
+            'secrets': secrets_value,
+            'common_secrets': common_secrets_value
+        }
+        j = json.dumps(secrets)
+        output = check_output(
+            ['python', 'encode_secrets.py'],
+            input=(str.encode(j))
+        )
+        expected = [
+            {'name':'Val1', 'valueFrom':'some-secret-arn'},
+            {'name':'Val2', 'valueFrom':'some-secret-arn'}
+        ]
+        actual = json.loads(output.decode())
+        secrets = json.loads(actual['secrets'])
+        assert secrets == expected
+
+    def test_no_secrets(self):
+        secrets = {
+            'secrets': json.dumps({}),
+            'common_secrets': json.dumps({})
+        }
+        j = json.dumps(secrets)
+        output = check_output(
+            ['python', 'encode_secrets.py'],
+            input=(str.encode(j))
+        )
+        expected = [
+        ]
+        actual = json.loads(output.decode())
+        secrets = json.loads(actual['secrets'])
+        assert secrets == expected
