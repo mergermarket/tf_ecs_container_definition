@@ -56,12 +56,12 @@ variable "port_mappings" {
   type        = "string"
 }
 
-variable "team_secrets" {
+variable "application_secrets" {
   type = "list"
   default = []
 }
 
-variable "common_secrets" {
+variable "platform_secrets" {
   type = "list"
   default = []
 }
