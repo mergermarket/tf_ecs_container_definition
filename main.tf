@@ -55,5 +55,5 @@ data "aws_secretsmanager_secret" "secret" {
 
 data "aws_secretsmanager_secret" "platform_secrets" {
   count = "${length(var.platform_secrets)}"
-  name  = "common/${element(var.platform_secrets, count.index)}"
+  name  = "platform_secrets/${element(var.platform_secrets, count.index)}"
 }
