@@ -25,8 +25,8 @@ module "tf_ecs_container_definition_test" {
   mountpoint         = "${var.mountpoint}"
   container_env      = "${var.container_env}"
   metadata           = "${var.metadata}"
-  team_secrets       = "${var.team_secrets}"
-  common_secrets     = "${var.common_secrets}"
+  application_secrets       = "${var.application_secrets}"
+  platform_secrets     = "${var.platform_secrets}"
 }
 
 variable "name" {}
@@ -49,9 +49,9 @@ variable "container_env" { default = {} }
  
 variable "metadata" { default = {} }
  
-variable "team_secrets" { default = [] }
+variable "application_secrets" { default = [] }
 
-variable "common_secrets" { default = [] }
+variable "platform_secrets" { default = [] }
 
 variable "memory" {}
 
