@@ -16,6 +16,12 @@ variable "memory" {
   default     = "256"
 }
 
+variable "command" {
+  description = "The command that is passed to the container"
+  type        = "list"
+  default     = []
+}
+
 variable "nofile_soft_ulimit" {
   description = "The soft ulimit for the number of files in container"
   default     = "4096"
