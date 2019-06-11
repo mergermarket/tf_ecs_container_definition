@@ -19,6 +19,7 @@ data "template_file" "container_definitions" {
 
     cpu                = "${var.cpu}"
     mem                = "${var.memory}"
+    command            = "${length(var.command) > 0 ? jsonencode(var.command) : "null"}"
     container_env      = "${data.external.encode_env.result["env"]}"
     secrets            = "${data.external.encode_secrets.result["secrets"]}"
     labels             = "${jsonencode(var.labels)}"

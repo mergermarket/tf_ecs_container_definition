@@ -5,7 +5,7 @@ import tempfile
 import shutil
 import json
 
-from subprocess import check_call, check_output, PIPE, Popen
+from subprocess import check_call, check_output
 
 
 REGION = 'eu-west-1'
@@ -25,7 +25,8 @@ class TestContainerDefinition(unittest.TestCase):
     def tearDown(self):
         print('Tearing down')
         check_call(
-            ['terraform', 'destroy', '-force'] + self.last_args + [self.module_path],
+            ['terraform', 'destroy', '-force'] +
+            self.last_args + [self.module_path],
             cwd=self.workdir
         )
 
@@ -43,7 +44,7 @@ class TestContainerDefinition(unittest.TestCase):
                 for key, val in variables.items()
             ], []
         )
-        print('args',args)
+        print('args', args)
 
         args += ['-var-file', varsmap_file]
 
@@ -87,7 +88,10 @@ class TestContainerDefinition(unittest.TestCase):
         assert definition['memory'] == 1024
         assert definition['essential']
 
-        assert {'softLimit': 1000, 'name': 'nofile', 'hardLimit': 65535} in definition['ulimits']
+        assert {
+            'softLimit': 1000, 'name': 'nofile',
+            'hardLimit': 65535
+        } in definition['ulimits']
         assert {'containerPort': 8001} in definition['portMappings']
 
     def test_override_port_mappings(self):
@@ -107,7 +111,7 @@ class TestContainerDefinition(unittest.TestCase):
         definition = self._apply_and_parse(variables, varsmap)
 
         # then
-        assert [ { 'containerPort': 7654 } ] == definition['portMappings']
+        assert [{'containerPort': 7654}] == definition['portMappings']
 
     def test_labels(self):
         # Given
@@ -257,37 +261,82 @@ class TestContainerDefinition(unittest.TestCase):
         # then
         assert definition['linuxParameters']['initProcessEnabled']
 
+    def test_command(self):
+        # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024
+        }
+        varsmap = {
+            'command': ["/bin/bash", "-c", "cat"]
+        }
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert definition['command'] == ["/bin/bash", "-c", "cat"]
+
+    def test_command_empty(self):
+        # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024
+        }
+        varsmap = {
+            'command': []
+        }
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert definition['command'] is None
+
+
 class TestEncodeSecrets(unittest.TestCase):
 
     def test_encode_secrets(self):
-        secrets_value = json.dumps({'Val1':'some-secret-arn'})
-        secrets = {'secrets': secrets_value }
+        secrets_value = json.dumps({'Val1': 'some-secret-arn'})
+        secrets = {'secrets': secrets_value}
         j = json.dumps(secrets)
         output = check_output(
             ['python', 'encode_secrets.py'],
             input=(str.encode(j))
         )
-        expected = [{'name':'Val1', 'valueFrom':'some-secret-arn'}]
+        expected = [{'name': 'Val1', 'valueFrom': 'some-secret-arn'}]
         actual = json.loads(output.decode())
         secrets = json.loads(actual['secrets'])
         assert secrets == expected
 
     def test_encode_common_secrets(self):
-        secrets_value = json.dumps({'Val1':'some-secret-arn'})
-        secrets = {'common_secrets': secrets_value }
+        secrets_value = json.dumps({'Val1': 'some-secret-arn'})
+        secrets = {'common_secrets': secrets_value}
         j = json.dumps(secrets)
         output = check_output(
             ['python', 'encode_secrets.py'],
             input=(str.encode(j))
         )
-        expected = [{'name':'Val1', 'valueFrom':'some-secret-arn'}]
+        expected = [{'name': 'Val1', 'valueFrom': 'some-secret-arn'}]
         actual = json.loads(output.decode())
         secrets = json.loads(actual['secrets'])
         assert secrets == expected
 
     def test_encode_all_secrets(self):
-        secrets_value = json.dumps({'Val1':'some-secret-arn'})
-        common_secrets_value = json.dumps({'Val2':'some-secret-arn'})
+        secrets_value = json.dumps({'Val1': 'some-secret-arn'})
+        common_secrets_value = json.dumps({'Val2': 'some-secret-arn'})
         secrets = {
             'secrets': secrets_value,
             'common_secrets': common_secrets_value
@@ -298,8 +347,8 @@ class TestEncodeSecrets(unittest.TestCase):
             input=(str.encode(j))
         )
         expected = [
-            {'name':'Val1', 'valueFrom':'some-secret-arn'},
-            {'name':'Val2', 'valueFrom':'some-secret-arn'}
+            {'name': 'Val1', 'valueFrom': 'some-secret-arn'},
+            {'name': 'Val2', 'valueFrom': 'some-secret-arn'}
         ]
         actual = json.loads(output.decode())
         secrets = json.loads(actual['secrets'])
