@@ -1,7 +1,7 @@
 locals {
-    team = "${lookup(var.labels, "team", "")}"
-    env = "${lookup(var.labels, "env", "")}"
-    component = "${lookup(var.labels, "component", "")}"
+  team      = "${lookup(var.labels, "team", "")}"
+  env       = "${lookup(var.labels, "env", "")}"
+  component = "${lookup(var.labels, "component", "")}"
 }
 
 data "template_file" "container_definitions" {
@@ -13,8 +13,8 @@ data "template_file" "container_definitions" {
 
     port_mappings = "${
       var.port_mappings == "" ?
-        format("[ { \"containerPort\": %s } ]", var.container_port) :
-        var.port_mappings
+      format("[ { \"containerPort\": %s } ]", var.container_port) :
+      var.port_mappings
     }"
 
     cpu                = "${var.cpu}"
@@ -44,8 +44,8 @@ data "external" "encode_secrets" {
   program = ["python", "${path.module}/encode_secrets.py"]
 
   query = {
-    secrets   = "${jsonencode(zipmap(var.application_secrets, data.aws_secretsmanager_secret.secret.*.arn))}"
-    common_secrets ="${jsonencode(zipmap(var.platform_secrets, data.aws_secretsmanager_secret.platform_secrets.*.arn))}"
+    secrets        = "${jsonencode(zipmap(var.application_secrets, data.aws_secretsmanager_secret.secret.*.arn))}"
+    common_secrets = "${jsonencode(zipmap(var.platform_secrets, data.aws_secretsmanager_secret.platform_secrets.*.arn))}"
   }
 }
 

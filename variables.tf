@@ -63,11 +63,11 @@ variable "port_mappings" {
 }
 
 variable "application_secrets" {
-  type = "list"
+  type    = "list"
   default = []
 }
 
 variable "platform_secrets" {
-  type = "list"
+  type    = "list"
   default = []
 }
