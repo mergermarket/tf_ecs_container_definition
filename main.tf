@@ -9,7 +9,7 @@ data "template_file" "container_definitions" {
 
   vars {
     image          = "${var.image}"
-    container_name = "${var.name}"
+    container_name = "${replace(var.name, ".", "_")}"
 
     port_mappings = "${
       var.port_mappings == "" ?
