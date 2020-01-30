@@ -17,8 +17,8 @@ variable "memory" {
 }
 
 variable "memory_reservation" {
-  description = "The memory reservation limit for this container definition"
-  default     = "255"
+  description = "The memory reservation limit for this container definition, by default it is ignored"
+  default     = "none"
 }
 
 variable "command" {
