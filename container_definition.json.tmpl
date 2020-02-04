@@ -5,6 +5,7 @@
     "portMappings": ${port_mappings},
     "cpu": ${cpu},
     "memory": ${mem},
+    ${memory_reservation == "none" ? "" : format("\"memory_reservation\": %s,", memory_reservation)}
     "command": ${command},
     "environment": ${container_env},
     "secrets": ${secrets},

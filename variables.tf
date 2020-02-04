@@ -16,6 +16,11 @@ variable "memory" {
   default     = "256"
 }
 
+variable "memory_reservation" {
+  description = "The memory reservation limit for this container definition, by default it is ignored"
+  default     = "none"
+}
+
 variable "command" {
   description = "The command that is passed to the container"
   type        = "list"
