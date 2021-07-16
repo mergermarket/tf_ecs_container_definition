@@ -5,7 +5,8 @@
     "portMappings": ${port_mappings},
     "cpu": ${cpu},
     "memory": ${mem},
-    ${memory_reservation == "none" ? "" : format("\"memory_reservation\": %s,", memory_reservation)}
+    ${stop_timeout == "none" ? "" : format("\"stopTimeout\": %s,", stop_timeout)}  
+    ${memory_reservation == "none" ? "" : format("\"memoryReservation\": %s,", memory_reservation)}
     "command": ${command},
     "environment": ${container_env},
     "secrets": ${secrets},
