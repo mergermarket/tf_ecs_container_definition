@@ -18,7 +18,6 @@ data "template_file" "container_definitions" {
     }"
 
     cpu                = "${var.cpu}"
-    stop_timeout       = "${var.stop}"
     mem                = "${var.memory}"
     memory_reservation = "${var.memory_reservation}"
     stop_timeout       = "${var.stop_timeout}"
