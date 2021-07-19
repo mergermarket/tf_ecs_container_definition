@@ -28,6 +28,8 @@ module "tf_ecs_container_definition_test" {
   metadata            = "${var.metadata}"
   application_secrets = "${var.application_secrets}"
   platform_secrets    = "${var.platform_secrets}"
+  stop_timeout        = "${var.stop_timeout}"
+  memory_reservation  = "${var.memory_reservation}"
 }
 
 variable "name" {}
@@ -56,9 +58,13 @@ variable "platform_secrets" { default = [] }
 
 variable "memory" { default = "256" }
 
+variable "memory_reservation" { default = "none" }
+
 variable "cpu" { default = "64" }
 
 variable "command" { default = [] }
+
+variable "stop_timeout" { default = "none" }
 
 output "rendered" {
   value = "${module.tf_ecs_container_definition_test.rendered}"

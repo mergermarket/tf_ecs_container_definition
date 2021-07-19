@@ -87,6 +87,8 @@ class TestContainerDefinition(unittest.TestCase):
         assert definition['cpu'] == 1024
         assert definition['memory'] == 1024
         assert definition['essential']
+        assert 'stopTimeout' not in definition
+        assert 'memoryReservation' not in definition
 
         assert {
             'softLimit': 1000, 'name': 'nofile',
@@ -282,6 +284,92 @@ class TestContainerDefinition(unittest.TestCase):
         assert definition['cpu'] == 1024
         assert definition['memory'] == 1024
         assert definition['command'] == ["/bin/bash", "-c", "cat"]
+
+    def test_stop_timeout(self):
+        # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'stop_timeout': '120'
+        }
+        varsmap = {
+            'command': ["/bin/bash", "-c", "cat"]
+        }
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert definition['stopTimeout'] == 120
+
+    def test_stop_timeout_not_set(self):
+            # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+        }
+        varsmap = {}
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert 'stopTimeout' not in definition 
+
+    def test_memory_reservation(self):
+        # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+            'memory_reservation': '1024'
+        }
+        varsmap = {
+            'command': ["/bin/bash", "-c", "cat"]
+        }
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert definition['memoryReservation'] == 1024
+
+    def test_memory_reservation_not_set(self):
+            # Given
+        variables = {
+            'name': 'test-' + str(int(time.time() * 1000)),
+            'image': '123',
+            'cpu': 1024,
+            'memory': 1024,
+        }
+        varsmap = {}
+
+        # when
+        definition = self._apply_and_parse(variables, varsmap)
+
+        # then
+        assert definition['name'] == variables['name']
+        assert definition['image'] == '123'
+        assert definition['cpu'] == 1024
+        assert definition['memory'] == 1024
+        assert 'memoryReservation' not in definition    
 
     def test_command_empty(self):
         # Given
