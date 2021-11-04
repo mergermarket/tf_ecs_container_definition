@@ -1,7 +1,7 @@
 `container_definitions` module
 -----------------------------
 
-[![Build Status](https://travis-ci.com/mergermarket/tf_ecs_container_definition.svg?branch=master)](https://travis-ci.com/mergermarket/tf_ecs_container_definition)
+[![Test](https://github.com/mergermarket/tf_ecs_container_definition/actions/workflows/test.yml/badge.svg)](https://github.com/mergermarket/tf_ecs_container_definition/actions/workflows/test.yml)
 
 This module should contain the logic that generates our default set of container definitions,
 providing the rendered definitions as an output.
